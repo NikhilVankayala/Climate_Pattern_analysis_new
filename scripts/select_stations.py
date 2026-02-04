@@ -1,22 +1,20 @@
-# select_stations.py
-
 import pandas as pd
 import numpy as np
 from pathlib import Path
 
 # Configuration
-NUM_STATIONS = 5500  # Increased to 5500
+NUM_STATIONS = 5500  
 DATA_DIR = Path("data")
 
 # Regional distribution (targeting 5500 total)
 REGIONAL_DISTRIBUTION = {
-    'Northeast': 770,    # ~14%
-    'Southeast': 963,    # ~17.5%
-    'Midwest': 1100,     # ~20%
-    'Southwest': 770,    # ~14%
-    'West': 1045,        # ~19%
-    'Alaska': 426,       # ~8%
-    'Hawaii': 426        # ~8%
+    'Northeast': 770,    
+    'Southeast': 963,    
+    'Midwest': 1100,     
+    'Southwest': 770,    
+    'West': 1045,        
+    'Alaska': 426,       
+    'Hawaii': 426        
 }
 
 # State to region mapping

@@ -1,19 +1,15 @@
-# Data files - DO NOT COMMIT
 data/
 *.csv
 
-# Python
 __pycache__/
 *.pyc
 venv/
 *.py[cod]
 .Python
 
-# IDE
 .vscode/
 .idea/
 .DS_Store
 
-# Large files
 *.gz
 *.zip

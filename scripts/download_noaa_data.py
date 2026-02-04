@@ -1,5 +1,3 @@
-# download_noaa_data.py
-
 import requests
 from pathlib import Path
 import time

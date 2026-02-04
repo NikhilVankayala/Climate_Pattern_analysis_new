@@ -1,5 +1,3 @@
-# diagnose_data.py
-
 import pandas as pd
 from pathlib import Path
 

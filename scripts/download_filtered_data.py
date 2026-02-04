@@ -1,5 +1,3 @@
-# download_filtered_data.py
-
 import pandas as pd
 import gzip
 import shutil

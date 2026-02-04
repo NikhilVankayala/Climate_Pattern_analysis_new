@@ -1,5 +1,3 @@
-# combine_without_pivot.py
-
 import pandas as pd
 from pathlib import Path
 import time
