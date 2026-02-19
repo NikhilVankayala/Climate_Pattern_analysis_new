@@ -48,14 +48,13 @@ def download_file(url, output_path):
         return False
 
 def download_station_metadata():
-    """Download station metadata file"""
-    print("\n=== Downloading Station Metadata ===")
+    #Downloading station metadata
     url = f"{BASE_URL}/ghcnd-stations.txt"
     output = DATA_DIR / "raw" / "stations" / "ghcnd-stations.txt"
     
     if output.exists():
-        print(f"  Station metadata already exists at: {output}")
-        print(f"  Skipping download...")
+        print(f"Station metadata already exists at: {output}")
+        print(f"Skipping download...")
         return True
     
     success = download_file(url, output)
@@ -78,7 +77,6 @@ def download_station_metadata():
     return success
 
 def save_download_log():
-    """Save download metadata"""
     log_file = DATA_DIR / "download_log.txt"
     
     with open(log_file, 'w') as f:
