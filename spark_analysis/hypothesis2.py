@@ -191,9 +191,10 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
     
     if verbose:
         print(f"\nCorrelations:")
-        print(f"  Spring temp anomaly vs Heat wave days: {corr_days:.4f}")
-        print(f"  Spring temp anomaly vs Max heat wave temp: {corr_intensity:.4f if corr_intensity else 'N/A'}")
-        print(f"  Spring temp anomaly vs Total extreme days: {corr_extreme:.4f}")
+        print(f"  Spring temp anomaly vs Heat wave days: {corr_days:.4f}" if corr_days else "  Spring temp anomaly vs Heat wave days: N/A")
+        corr_int_str = f"{corr_intensity:.4f}" if corr_intensity else "N/A"
+        print(f"  Spring temp anomaly vs Max heat wave temp: {corr_int_str}")
+        print(f"  Spring temp anomaly vs Total extreme days: {corr_extreme:.4f}" if corr_extreme else "  Spring temp anomaly vs Total extreme days: N/A")
     
     # -------------------------------------------------------------------------
     # Step 8: Compare warm vs cool springs
