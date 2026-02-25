@@ -7,10 +7,7 @@ from hypothesis2 import analyze_spring_summer_heat
 from hypothesis3 import analyze_wind_temperature_moderation
 from hypothesis4 import analyze_snowmelt_spring_precipitation
 
-
-# =============================================================================
 # REGION DEFINITIONS
-# =============================================================================
 
 REGION_MAPPING = {
     'Northeast': ['ME', 'NH', 'VT', 'MA', 'RI', 'CT', 'NY', 'NJ', 'PA'],
@@ -32,9 +29,7 @@ def get_state_to_region():
     return state_to_region
 
 
-# =============================================================================
 # ADD REGION TO DATA
-# =============================================================================
 
 def add_region_column(df, station_metadata_df):
     """
@@ -92,10 +87,7 @@ def add_region_from_station_id(df):
     """
     return df.withColumn("REGION", lit("Unknown"))
 
-
-# =============================================================================
 # REGIONAL ANALYSIS
-# =============================================================================
 
 def analyze_regional_consistency(df, station_metadata_df=None, verbose=True):
     """
@@ -137,9 +129,7 @@ def analyze_regional_consistency(df, station_metadata_df=None, verbose=True):
         for row in sorted(region_counts, key=lambda x: x["count"], reverse=True):
             print(f"  {row['REGION']}: {row['count']:,}")
     
-    # -------------------------------------------------------------------------
     # Step 2: Run each hypothesis by region
-    # -------------------------------------------------------------------------
     regions = [row["REGION"] for row in region_counts if row["REGION"] is not None]
     
     all_results = {
@@ -238,18 +228,14 @@ def analyze_regional_consistency(df, station_metadata_df=None, verbose=True):
                 print(f"  H4 Error: {e}")
             all_results["H4_snowmelt_precipitation"][region] = {"error": str(e)}
     
-    # -------------------------------------------------------------------------
     # Step 3: Compile summary comparison
-    # -------------------------------------------------------------------------
     if verbose:
         print_regional_summary(all_results)
     
     return all_results
 
 
-# =============================================================================
 # SUMMARY OUTPUT
-# =============================================================================
 
 def print_regional_summary(all_results):
     """Print formatted summary of regional results."""
@@ -359,10 +345,7 @@ Hypothesis 5 is NOT SUPPORTED if different regions show opposite patterns
 (positive correlation in some regions, negative in others).
 """)
 
-
-# =============================================================================
 # MYSQL EXPORT FOR REGIONAL RESULTS
-# =============================================================================
 
 def export_regional_results_to_mysql(all_results, exporter):
     """
@@ -409,10 +392,7 @@ def export_regional_results_to_mysql(all_results, exporter):
         exporter.execute_many(sql, data)
         print(f"  Exported {len(data)} regional results")
 
-
-# =============================================================================
 # STANDALONE EXECUTION
-# =============================================================================
 
 if __name__ == "__main__":
     print("Hypothesis 5: Regional Consistency Analysis")

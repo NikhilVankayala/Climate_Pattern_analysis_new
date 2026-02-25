@@ -14,9 +14,9 @@ from hypothesis3 import analyze_wind_temperature_moderation
 from hypothesis4 import analyze_snowmelt_spring_precipitation
 
 
-# =============================================================================
+
 # SPARK SESSION WITH CONFIGURABLE WORKERS
-# =============================================================================
+
 
 def create_spark_session(num_workers=None, app_name="ClimateAnalysisBenchmark"):
     """
@@ -43,9 +43,8 @@ def create_spark_session(num_workers=None, app_name="ClimateAnalysisBenchmark"):
     return spark
 
 
-# =============================================================================
+
 # DATA LOADING WITH SIZE CONTROL
-# =============================================================================
 
 def load_climate_data(spark, filepath, sample_fraction=1.0):
     """
@@ -82,9 +81,8 @@ def load_climate_data(spark, filepath, sample_fraction=1.0):
     return df
 
 
-# =============================================================================
+
 # BENCHMARK RUNNER
-# =============================================================================
 
 def run_single_benchmark(spark, df, hypothesis_num):
     """
@@ -136,9 +134,7 @@ def run_all_hypotheses_benchmark(spark, df):
     return times
 
 
-# =============================================================================
 # BENCHMARK EXPERIMENTS
-# =============================================================================
 
 def benchmark_varying_workers(data_path, output_dir, worker_counts=[1, 2, 4, 8]):
     """
@@ -242,9 +238,7 @@ def benchmark_varying_data_size(data_path, output_dir, fractions=[0.25, 0.5, 0.7
     return results
 
 
-# =============================================================================
 # SAVE RESULTS
-# =============================================================================
 
 def save_results_csv(results, output_path):
     """Save benchmark results to CSV."""
@@ -261,9 +255,7 @@ def save_results_csv(results, output_path):
     print(f"\nResults saved to {output_path}")
 
 
-# =============================================================================
 # GENERATE GRAPHS
-# =============================================================================
 
 def generate_graphs(results, output_dir):
     """
@@ -288,9 +280,7 @@ def generate_graphs(results, output_dir):
     # Set style
     plt.style.use('seaborn-v0_8-whitegrid')
     
-    # -------------------------------------------------------------------------
     # Graph 1: Execution Time vs Number of Workers
-    # -------------------------------------------------------------------------
     if worker_results:
         fig, ax = plt.subplots(figsize=(10, 6))
         
@@ -326,9 +316,7 @@ def generate_graphs(results, output_dir):
         plt.close()
         print(f"Saved: {output_dir}/workers_benchmark.png")
     
-    # -------------------------------------------------------------------------
     # Graph 2: Execution Time vs Data Size
-    # -------------------------------------------------------------------------
     if datasize_results:
         fig, ax = plt.subplots(figsize=(10, 6))
         
@@ -365,9 +353,7 @@ def generate_graphs(results, output_dir):
         plt.close()
         print(f"Saved: {output_dir}/datasize_benchmark.png")
     
-    # -------------------------------------------------------------------------
     # Graph 3: Line Plot - Speedup Analysis
-    # -------------------------------------------------------------------------
     if worker_results:
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
         
@@ -411,9 +397,7 @@ def generate_graphs(results, output_dir):
         plt.close()
         print(f"Saved: {output_dir}/speedup_analysis.png")
     
-    # -------------------------------------------------------------------------
     # Graph 4: Scalability Analysis (Data Size)
-    # -------------------------------------------------------------------------
     if datasize_results:
         fig, ax = plt.subplots(figsize=(10, 6))
         
@@ -443,9 +427,7 @@ def generate_graphs(results, output_dir):
         plt.close()
         print(f"Saved: {output_dir}/scalability_analysis.png")
     
-    # -------------------------------------------------------------------------
     # Graph 5: Hypothesis Comparison (Pie Chart)
-    # -------------------------------------------------------------------------
     if worker_results:
         # Use 4-worker results for comparison
         r = next((r for r in worker_results if r["workers"] == 4), worker_results[-1])
@@ -472,9 +454,7 @@ def generate_graphs(results, output_dir):
             print(f"Saved: {output_dir}/hypothesis_distribution.png")
 
 
-# =============================================================================
 # MAIN
-# =============================================================================
 
 def main():
     parser = argparse.ArgumentParser(description="Benchmark Climate Analysis")

@@ -65,9 +65,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         print("HYPOTHESIS 4: Early Snowmelt → Reduced Spring Rainfall")
         print("="*80)
     
-    # -------------------------------------------------------------------------
     # Step 1: Check snow data availability
-    # -------------------------------------------------------------------------
     snwd_count = df.filter(col("ELEMENT") == "SNWD").count()
     
     if verbose:
@@ -76,9 +74,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
     if snwd_count < 1000:
         print("WARNING: Very limited snow data. Results may not be meaningful.")
     
-    # -------------------------------------------------------------------------
     # Step 2: Find snowmelt dates
-    # -------------------------------------------------------------------------
     last_snow_day = find_snowmelt_dates(df)
     
     # Filter to station-years with meaningful snow coverage
@@ -95,9 +91,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         print("ERROR: No stations with sufficient snow data")
         return None, {"error": "No snow data"}
     
-    # -------------------------------------------------------------------------
     # Step 3: Calculate snowmelt baseline and anomaly per station
-    # -------------------------------------------------------------------------
     snowmelt_baseline = last_snow_day.groupBy("STATION") \
         .agg(
             avg("snowmelt_doy").alias("baseline_melt_doy"),
@@ -130,9 +124,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         avg_melt = snowmelt_with_anomaly.select(avg("snowmelt_doy")).collect()[0][0]
         print(f"Average snowmelt day of year: {avg_melt:.0f} (~{int(avg_melt/30)+1} month)")
     
-    # -------------------------------------------------------------------------
     # Step 4: Calculate spring precipitation (April-May)
-    # -------------------------------------------------------------------------
     spring_prcp = df.filter(
         (col("ELEMENT") == "PRCP") & 
         col("month").isin([4, 5])
@@ -148,9 +140,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         prcp_records = spring_prcp.count()
         print(f"Station-years with spring precipitation data: {prcp_records:,}")
     
-    # -------------------------------------------------------------------------
     # Step 5: Calculate spring precipitation baseline and anomaly
-    # -------------------------------------------------------------------------
     prcp_baseline = spring_prcp.groupBy("STATION") \
         .agg(
             avg("spring_prcp").alias("baseline_spring_prcp"),
@@ -172,9 +162,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
             (col("spring_prcp") - col("baseline_spring_prcp")) / col("std_spring_prcp")
         )
     
-    # -------------------------------------------------------------------------
     # Step 6: Join snowmelt and precipitation data
-    # -------------------------------------------------------------------------
     combined = snowmelt_with_anomaly.join(
         spring_prcp_with_anomaly,
         ["STATION", "year"],
@@ -190,10 +178,8 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
     if combined.count() == 0:
         print("ERROR: No overlapping snowmelt and precipitation data")
         return None, {"error": "No overlapping data"}
-    
-    # -------------------------------------------------------------------------
+
     # Step 7: Calculate correlations
-    # -------------------------------------------------------------------------
     # Raw correlation: melt day vs spring precipitation
     correlation = combined.select(
         corr("snowmelt_doy", "spring_prcp")
@@ -215,9 +201,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         print(f"  Melt anomaly (days) vs Spring precip: {corr_days:.4f}")
         print(f"  Melt anomaly (std) vs Precip anomaly (std): {corr_std:.4f}")
     
-    # -------------------------------------------------------------------------
     # Step 8: Compare early vs late melt years
-    # -------------------------------------------------------------------------
     # Early melt: >1 standard deviation early
     early_melt = combined.filter(col("melt_anomaly_std") < -1)
     # Late melt: >1 standard deviation late
@@ -244,9 +228,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         if late_melt_prcp is not None:
             print(f"    Avg spring precip anomaly: {late_melt_prcp:+.2f}σ")
     
-    # -------------------------------------------------------------------------
     # Step 9: Calculate percentage showing expected pattern
-    # -------------------------------------------------------------------------
     # Early melt should correlate with dry spring
     early_dry = early_melt.filter(col("prcp_anomaly_std") < 0).count()
     early_dry_rate = (early_dry / early_melt_count * 100) if early_melt_count > 0 else None
@@ -261,9 +243,7 @@ def analyze_snowmelt_spring_precipitation(df, verbose=True):
         if late_wet_rate:
             print(f"Late melt years with above-avg spring rain: {late_wet_rate:.1f}%")
     
-    # -------------------------------------------------------------------------
     # Compile results
-    # -------------------------------------------------------------------------
     results = {
         "correlation": correlation,
         "correlation_standardized": corr_std,

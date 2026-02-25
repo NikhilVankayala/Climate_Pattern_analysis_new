@@ -23,18 +23,18 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         print("HYPOTHESIS 1: Dry Early Winter → Wet Late Winter")
         print("="*80)
     
-    # -------------------------------------------------------------------------
+    
     # Step 1: Filter to precipitation data only
-    # -------------------------------------------------------------------------
+    
     prcp_df = df.filter(col("ELEMENT") == "PRCP")
     
     if verbose:
         prcp_count = prcp_df.count()
         print(f"\nPrecipitation records: {prcp_count:,}")
     
-    # -------------------------------------------------------------------------
+    
     # Step 2: Calculate early winter precipitation (November-December)
-    # -------------------------------------------------------------------------
+    
     early_winter = prcp_df.filter(col("month").isin([11, 12])) \
         .groupBy("STATION", "year") \
         .agg(
@@ -47,9 +47,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         early_count = early_winter.count()
         print(f"Early winter (Nov-Dec) station-years with sufficient data: {early_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 3: Calculate late winter precipitation (February-March)
-    # -------------------------------------------------------------------------
     late_winter = prcp_df.filter(col("month").isin([2, 3])) \
         .groupBy("STATION", "year") \
         .agg(
@@ -62,11 +60,9 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         late_count = late_winter.count()
         print(f"Late winter (Feb-Mar) station-years with sufficient data: {late_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 4: Join early and late winter data
     # Note: Late winter of year N corresponds to early winter of year N-1
     # So we adjust early winter year by +1 to align with same winter season
-    # -------------------------------------------------------------------------
     early_winter_adj = early_winter.withColumn("winter_year", col("year") + 1)
     
     winter_combined = early_winter_adj.alias("early").join(
@@ -85,9 +81,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         combined_count = winter_combined.count()
         print(f"Matched winter seasons (early + late): {combined_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 5: Calculate station-level baselines (long-term averages)
-    # -------------------------------------------------------------------------
     station_baselines = winter_combined.groupBy("STATION") \
         .agg(
             avg("early_winter_prcp").alias("baseline_early"),
@@ -98,10 +92,8 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         ) \
         .filter(col("num_years") >= 5)  # Need enough years for reliable baseline
     
-    # -------------------------------------------------------------------------
     # Step 6: Calculate standardized anomalies
     # Anomaly = (observed - baseline) / std_dev
-    # -------------------------------------------------------------------------
     with_anomalies = winter_combined.join(station_baselines, "STATION") \
         .withColumn(
             "early_anomaly",
@@ -113,9 +105,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
         ) \
         .filter(col("std_early") > 0)  # Avoid division by zero
         
-    # -------------------------------------------------------------------------
     # Step 7: Calculate correlation
-    # -------------------------------------------------------------------------
     correlation_result = with_anomalies.select(
         corr("early_anomaly", "late_anomaly").alias("correlation")
     ).collect()[0]["correlation"]
@@ -123,9 +113,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
     if verbose:
         print(f"\nCorrelation (early winter deficit vs late winter surplus): {correlation_result:.4f}")
     
-    # -------------------------------------------------------------------------
     # Step 8: Test hypothesis - Do dry early winters predict wet late winters?
-    # -------------------------------------------------------------------------
     # Dry early winter = more than 1 standard deviation below average
     dry_early = with_anomalies.filter(col("early_anomaly") < -1)
     
@@ -142,9 +130,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
             print(f"  Cases with above-avg late winter: {wet_late_given_dry_early}")
             print(f"  Compensation rate: {compensation_rate:.1f}%")
     
-    # -------------------------------------------------------------------------
     # Step 9: Additional analysis - wet early winter
-    # -------------------------------------------------------------------------
     wet_early = with_anomalies.filter(col("early_anomaly") > 1)
     dry_late_given_wet_early = wet_early.filter(col("late_anomaly") < 0).count()
     total_wet_early = wet_early.count()
@@ -158,9 +144,7 @@ def analyze_winter_precipitation_lag(df, verbose=True):
             print(f"  Cases with below-avg late winter: {dry_late_given_wet_early}")
             print(f"  Reverse compensation rate: {reverse_rate:.1f}%")
     
-    # -------------------------------------------------------------------------
     # Compile results
-    # -------------------------------------------------------------------------
     results = {
         "correlation": correlation_result,
         "sample_size": with_anomalies.count(),

@@ -75,18 +75,14 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         print("HYPOTHESIS 2: Spring Temperatures → Summer Heat Wave Intensity")
         print("="*80)
     
-    # -------------------------------------------------------------------------
     # Step 1: Filter to TMAX data only
-    # -------------------------------------------------------------------------
     tmax_df = df.filter(col("ELEMENT") == "TMAX")
     
     if verbose:
         tmax_count = tmax_df.count()
         print(f"\nTMAX records: {tmax_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 2: Calculate spring average temperatures (March-May)
-    # -------------------------------------------------------------------------
     spring_temps = tmax_df.filter(col("month").isin([3, 4, 5])) \
         .groupBy("STATION", "year") \
         .agg(
@@ -100,9 +96,8 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         spring_count = spring_temps.count()
         print(f"Spring (Mar-May) station-years with sufficient data: {spring_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 3: Calculate spring temperature baselines and anomalies
-    # -------------------------------------------------------------------------
+
     spring_baseline = spring_temps.groupBy("STATION") \
         .agg(
             avg("spring_avg_tmax").alias("baseline_spring_temp"),
@@ -122,9 +117,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         stations_analyzed = spring_with_anomaly.select("STATION").distinct().count()
         print(f"Stations with reliable spring baselines: {stations_analyzed:,}")
     
-    # -------------------------------------------------------------------------
     # Step 4: Detect summer heat waves (June-August)
-    # -------------------------------------------------------------------------
     summer_temps = tmax_df.filter(col("month").isin([6, 7, 8]))
     
     if verbose:
@@ -134,9 +127,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
     # Detect heat waves
     heat_wave_days = detect_heat_waves(summer_temps, heat_threshold_percentile)
     
-    # -------------------------------------------------------------------------
     # Step 5: Aggregate heat wave metrics per station-year
-    # -------------------------------------------------------------------------
     heat_wave_metrics = heat_wave_days \
         .groupBy("STATION", "year") \
         .agg(
@@ -157,9 +148,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         total_years = heat_wave_metrics.count()
         print(f"Station-years with heat waves: {hw_years:,} / {total_years:,}")
     
-    # -------------------------------------------------------------------------
     # Step 6: Join spring temperatures with summer heat wave metrics
-    # -------------------------------------------------------------------------
     combined = spring_with_anomaly.join(
         heat_wave_metrics, 
         ["STATION", "year"], 
@@ -170,9 +159,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         combined_count = combined.count()
         print(f"Combined spring-summer records: {combined_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 7: Calculate correlations
-    # -------------------------------------------------------------------------
     # Correlation: spring temp anomaly vs number of heat wave days
     corr_days = combined.select(
         corr("spring_temp_anomaly", "heat_wave_days")
@@ -196,9 +183,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
         print(f"  Spring temp anomaly vs Max heat wave temp: {corr_int_str}")
         print(f"  Spring temp anomaly vs Total extreme days: {corr_extreme:.4f}" if corr_extreme else "  Spring temp anomaly vs Total extreme days: N/A")
     
-    # -------------------------------------------------------------------------
     # Step 8: Compare warm vs cool springs
-    # -------------------------------------------------------------------------
     # Warm springs: >1 standard deviation above average
     warm_springs = combined.filter(col("spring_temp_anomaly") > 1)
     # Cool springs: >1 standard deviation below average
@@ -226,9 +211,7 @@ def analyze_spring_summer_heat(df, heat_threshold_percentile=95, verbose=True):
             ratio = avg_hw_warm / avg_hw_cool
             print(f"  Ratio (warm/cool): {ratio:.2f}x")
     
-    # -------------------------------------------------------------------------
     # Compile results
-    # -------------------------------------------------------------------------
     results = {
         "correlation_days": corr_days,
         "correlation_intensity": corr_intensity,

@@ -54,9 +54,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         print("HYPOTHESIS 3: High Wind → Temperature Moderation")
         print("="*80)
     
-    # -------------------------------------------------------------------------
     # Step 1: Check wind data availability
-    # -------------------------------------------------------------------------
     awnd_count = df.filter(col("ELEMENT") == "AWND").count()
     total_count = df.count()
     
@@ -68,9 +66,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
     if awnd_count < 10000:
         print("\nWARNING: Limited wind data. Results may not be reliable.")
     
-    # -------------------------------------------------------------------------
     # Step 2: Pivot to wide format (need TMAX, TMIN, AWND together)
-    # -------------------------------------------------------------------------
     daily_df = pivot_to_wide_format(df)
     
     if verbose:
@@ -81,9 +77,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         print("ERROR: No data with all three variables (TMAX, TMIN, AWND)")
         return None, {"error": "No overlapping data"}
     
-    # -------------------------------------------------------------------------
     # Step 3: Calculate diurnal temperature range
-    # -------------------------------------------------------------------------
     daily_df = daily_df.withColumn("temp_range", col("TMAX") - col("TMIN"))
     
     # Filter out invalid ranges (should be positive)
@@ -93,9 +87,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         avg_range = daily_df.select(avg("temp_range")).collect()[0][0]
         print(f"Average diurnal temp range: {avg_range:.2f}°C")
     
-    # -------------------------------------------------------------------------
     # Step 4: Identify high wind days (>90th percentile per station)
-    # -------------------------------------------------------------------------
     wind_thresholds = daily_df.groupBy("STATION") \
         .agg(
             expr("percentile(AWND, 0.90)").alias("wind_threshold"),
@@ -112,9 +104,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         total_days = daily_with_threshold.count()
         print(f"High wind days (>90th percentile): {high_wind_days:,} / {total_days:,}")
     
-    # -------------------------------------------------------------------------
     # Step 5: Calculate lagged temperature ranges using window functions
-    # -------------------------------------------------------------------------
     window = Window.partitionBy("STATION").orderBy("DATE")
     
     # Add lag columns (days before the event)
@@ -132,9 +122,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
             lead("temp_range", i).over(window)
         )
     
-    # -------------------------------------------------------------------------
     # Step 6: Calculate average temp range before and after
-    # -------------------------------------------------------------------------
     # Build column references for averaging
     lag_cols = [col(f"temp_range_lag_{i}") for i in range(1, lag_days + 1)]
     lead_cols = [col(f"temp_range_lead_{i}") for i in range(1, lag_days + 1)]
@@ -151,9 +139,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         sum(lead_cols) / lag_days
     )
     
-    # -------------------------------------------------------------------------
     # Step 7: Filter to high wind days with complete before/after data
-    # -------------------------------------------------------------------------
     high_wind_events = with_lags.filter(
         col("is_high_wind") & 
         col("avg_range_before").isNotNull() & 
@@ -170,9 +156,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         event_count = high_wind_events.count()
         print(f"High wind events with complete before/after data: {event_count:,}")
     
-    # -------------------------------------------------------------------------
     # Step 8: Aggregate results
-    # -------------------------------------------------------------------------
     if high_wind_events.count() == 0:
         print("ERROR: No complete high wind events to analyze")
         return None, {"error": "No complete events"}
@@ -191,9 +175,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
         print(f"  Average temp range AFTER high wind: {results_agg['avg_range_after']:.2f}°C")
         print(f"  Average change: {results_agg['avg_range_change']:.2f}°C")
     
-    # -------------------------------------------------------------------------
     # Step 9: Calculate moderation rate
-    # -------------------------------------------------------------------------
     moderation_count = high_wind_events.filter(col("range_change") < 0).count()
     total_events = results_agg['num_events']
     
@@ -204,9 +186,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
             print(f"\nEvents showing moderation (decreased range): {moderation_count:,} / {total_events:,}")
             print(f"Moderation rate: {moderation_rate:.1f}%")
     
-    # -------------------------------------------------------------------------
     # Step 10: Statistical significance check
-    # -------------------------------------------------------------------------
     # Compare to random expectation (50% would show decrease by chance)
     expected_by_chance = 50.0
     
@@ -217,9 +197,7 @@ def analyze_wind_temperature_moderation(df, lag_days=7, verbose=True):
             diff = moderation_rate - expected_by_chance
             print(f"  Observed - Expected: {diff:+.1f}%")
     
-    # -------------------------------------------------------------------------
     # Compile results
-    # -------------------------------------------------------------------------
     results = {
         "avg_range_before": results_agg['avg_range_before'],
         "avg_range_after": results_agg['avg_range_after'],
