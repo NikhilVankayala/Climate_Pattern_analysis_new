@@ -1,5 +1,8 @@
 data/
-*.csv
+
+server/
+client/
+code/
 
 __pycache__/
 *.pyc

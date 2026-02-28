@@ -1,0 +1,45 @@
+{
+  "hypothesis_1_winter_precipitation": {
+    "correlation": 0.09588448772151384,
+    "sample_size": 19087,
+    "compensation_rate": 37.56653992395437,
+    "reverse_compensation_rate": 49.43633952254642,
+    "dry_early_cases": 2630,
+    "wet_early_cases": 3016
+  },
+  "hypothesis_2_spring_summer_heat": {
+    "correlation_days": 0.2174780079409489,
+    "correlation_intensity": 0.05762786413376259,
+    "correlation_extreme_days": 0.2779368379045669,
+    "avg_hw_warm_spring": 2.792870036101083,
+    "avg_hw_cool_spring": 0.8713004484304933,
+    "avg_extreme_warm_spring": 5.884476534296029,
+    "avg_extreme_cool_spring": 2.42152466367713,
+    "warm_spring_cases": 2216,
+    "cool_spring_cases": 2230,
+    "sample_size": 14275,
+    "heat_threshold_percentile": 95
+  },
+  "hypothesis_3_wind_moderation": {
+    "avg_range_before": 10.984719095903934,
+    "avg_range_after": 10.913541169564466,
+    "avg_range_change": -0.0711779263394833,
+    "std_range_change": 2.95249884673407,
+    "num_events": 67654,
+    "moderation_rate": 50.37100540987968,
+    "lag_days": 7
+  },
+  "hypothesis_4_snowmelt_precipitation": {
+    "correlation": -0.12990038311220647,
+    "correlation_standardized": 0.13137647021216436,
+    "correlation_days": 0.04917813846734508,
+    "early_melt_prcp_anomaly": -0.1850220686009982,
+    "late_melt_prcp_anomaly": 0.17961110661284518,
+    "early_melt_cases": 1194,
+    "late_melt_cases": 1242,
+    "early_dry_rate": 61.222780569514235,
+    "late_wet_rate": 51.52979066022544,
+    "sample_size": 8156,
+    "num_stations": 601
+  }
+}
