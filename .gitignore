@@ -1,8 +1,6 @@
 data/
 
-server/
-client/
-code/
+node_modules/
 
 __pycache__/
 *.pyc
