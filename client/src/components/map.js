@@ -4,7 +4,6 @@ import { latLng, latLngBounds } from 'leaflet';
 import Station from "./station.js"
 
 import '../styles/map.css'
-import 'leaflet/dist/leaflet.css';
 
 import axios from 'axios';
 import React, {useState, useEffect} from 'react';
@@ -12,12 +11,16 @@ import React, {useState, useEffect} from 'react';
 const position = [39.8, -98.6]
 
 const Map = () => {
-    const [markers, setMarkers] = useState([]);
+    const [someMarkers, setSomeMarkers] = useState([]);
+    const [allMarkers, setAllMarkers] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
-            const res = await axios.get("http://localhost:9000/stations");
-            setMarkers(res.data);
+            const resA = await axios.get("http://localhost:9000/someStations");
+            setSomeMarkers(resA.data);
+
+            //const resB = await axios.get("http://localhost:9000/someSomeStations");
+            //setAllMarkers(resB.data);
         }
         fetchData();
     }, []);
@@ -30,7 +33,7 @@ const Map = () => {
             attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
             />
             <div id='markers'>
-                {markers.map((d) => (<Station data={d}></Station>))}
+                {someMarkers.map((d) => (<Station data={d}></Station>))}
             </div>
         </MapContainer>
     </div>
