@@ -1,12 +1,21 @@
 #background-bar{
     width: 100%;
-    padding: 0 1vw 4px 1vw;
+    padding: 2px 1vw 4px 1vw;
     background-color: navy;
     background-image: linear-gradient(to right, navy , steelblue);
     display: flex;
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     color: white;
     font-family: "Merriweather Sans", sans-serif;
     box-sizing: border-box;
     height: 2.4rem;
+    font-weight: bold;
+}
+
+.header-children {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 2rem;
+    flex-grow: 4;
 }

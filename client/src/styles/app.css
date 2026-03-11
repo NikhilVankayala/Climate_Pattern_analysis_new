@@ -16,6 +16,7 @@
     position: relative;
     flex-grow: 2;
     flex-basis: 75%;
+    z-index: 1;
 }
 
 #side-holder {
@@ -23,4 +24,84 @@
     flex-shrink: 2;
     flex-basis: 30%;
     padding: 0 0 0 0.5%;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: baseline;
+}
+
+.search-bar {
+    font-size: 1rem;
+    width: 20em;
+    margin: 0;
+    height: 1.2rem;
+}
+
+.search-bar div {
+    z-index: 100;
+    font-size: 1rem !important;
+    font-weight: normal;
+    color: navy;
+}
+
+.search-bar > div {
+    border-radius: 1px 1px 5px 5px;
+    background-color: white;
+    border: 1px solid gray;
+    position: static;
+    min-height: 0;
+    padding: 4px;
+    box-sizing: content-box;
+}
+
+.search-bar .css-1jqq78o-placeholder {
+    opacity: 0.3;
+}
+
+.search-bar .css-13cymwt-control {
+    z-index: 2;
+}
+
+.search-bar input, .search-bar .css-1nmdiq5-menu {
+    background: white !important;
+    z-index: 100 !important;
+}
+
+.css-1nmdiq5-menu div {
+    background: white ;
+    z-index: 2 !important;
+    cursor: pointer;
+    color: rgba(0, 0, 128, 0.8)
+}
+
+.css-1nmdiq5-menu::before {
+    z-index: 2 !important;
+}
+
+.css-1nmdiq5-menu div:hover {
+    background: whitesmoke;
+    color: rgba(0, 0, 128, 1)
+}
+
+.css-1nmdiq5-menu {
+    z-index: 2 !important;
+    padding: 0 !important;
+}
+
+.search-bar .css-hlgwow, .search-bar .css-19bb58m {
+    padding: 0;
+    margin: 0;
+}
+
+.search-bar .css-1xc3v61-indicatorContainer, .search-bar .css-15lsz6c-indicatorContainer {
+    padding: 0;
+    height: 1.2rem;
+}
+
+#DIE {
+    color: #585858;
+    font: 16px/24px Tahoma, Verdana, sans-serif;
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
 }

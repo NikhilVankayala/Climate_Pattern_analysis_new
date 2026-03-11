@@ -2,6 +2,8 @@ data/
 
 node_modules/
 
+spark_analysis
+
 __pycache__/
 *.pyc
 venv/

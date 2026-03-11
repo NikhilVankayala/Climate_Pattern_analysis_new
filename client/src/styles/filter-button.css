@@ -1,0 +1,32 @@
+.dropdown, .dropdown  label, .dropdown  select {
+    font-size: 1rem;
+    color: navy;
+    font-family: "Merriweather Sans", sans-serif;
+    border: none;
+    margin: 0;
+    padding: 0 0.2rem 0.6rem 0.2rem;
+    font-weight: normal;
+    background: none;
+}
+
+.dropdown {
+    border-radius: 1px 1px 5px 5px;
+    background-color: white;
+    padding: 4px;
+    width: 9rem;
+    position: relative;
+    height: 1.2rem;
+}
+
+.dropdown label{
+    position: absolute;
+    cursor: pointer;
+}
+
+.dropdown select {
+    width: 100%;
+    position: absolute;
+    text-align: right;
+    right: 0.2rem;
+    cursor: pointer;
+}
