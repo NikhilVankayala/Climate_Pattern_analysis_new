@@ -27,6 +27,7 @@ const getSearchValue1 = "/searchValue1";
 const getSearchValue2 = "/searchValue2";
 const getSearchValue3 = "/searchValue3";
 const getSearchValue4 = "/searchValue4";
+const getStationHypothesis5 = "/stationResults5";
 
 // testConnection
 app.get(testConnection, (req, res) => {
@@ -44,7 +45,9 @@ app.get(testConnection, (req, res) => {
 });
 
 app.get(getStations, (req, res) => {
-  pool.query(`SELECT * FROM selected_stations;`, 
+  input = req.query.input
+  //pool.query(`SELECT * FROM selected_stations;`,
+  pool.query(`SELECT * FROM selected_stations ss WHERE EXISTS (SELECT STATION FROM ${input} h1 WHERE ss.STATION_ID = h1.STATION);`, 
           
   (err, data) => {
     if (err) {
@@ -245,7 +248,7 @@ app.get(getSearchValue, (req, res) => {
 app.get(getSearchValue1, (req, res) => {
   const input = req.query.out.replaceAll("+", " ")
   pool.query(`SELECT * FROM (SELECT STATION, year, early_winter_prcp, late_winter_prcp, NAME FROM hypothesis_1 h1
-RIGHT JOIN selected_stations ss on ss.STATION_ID = h1.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}';`,
+RIGHT JOIN selected_stations ss on ss.STATION_ID = h1.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}' ORDER BY h1.year;`,
     
   (err, data) => {
     if (err) {
@@ -260,7 +263,7 @@ RIGHT JOIN selected_stations ss on ss.STATION_ID = h1.STATION) AS res WHERE STAT
 app.get(getSearchValue2, (req, res) => {
   const input = req.query.out.replaceAll("+", " ")
   pool.query(`SELECT * FROM (SELECT STATION, year, h2.spring_avg_tmax, h2.heat_wave_days, NAME FROM hypothesis_2 h2
-RIGHT JOIN selected_stations ss on ss.STATION_ID = h2.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}';`,
+RIGHT JOIN selected_stations ss on ss.STATION_ID = h2.STATION WHERE h2.heat_wave_days != 0) AS res WHERE STATION = '${input}' OR NAME = '${input}' ORDER BY h2.year;`,
     
   (err, data) => {
     if (err) {
@@ -275,7 +278,7 @@ RIGHT JOIN selected_stations ss on ss.STATION_ID = h2.STATION) AS res WHERE STAT
 app.get(getSearchValue3, (req, res) => {
   const input = req.query.out.replaceAll("+", " ")
   pool.query(`SELECT * FROM (SELECT STATION, DATE, h3.AWND, h3.avg_range_after, h3.avg_range_before, NAME FROM hypothesis_3 h3
-RIGHT JOIN selected_stations ss on ss.STATION_ID = h3.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}';`,
+RIGHT JOIN selected_stations ss on ss.STATION_ID = h3.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}' ORDER BY h3.DATE;`,
     
   (err, data) => {
     if (err) {
@@ -290,7 +293,43 @@ RIGHT JOIN selected_stations ss on ss.STATION_ID = h3.STATION) AS res WHERE STAT
 app.get(getSearchValue4, (req, res) => {
   const input = req.query.out.replaceAll("+", " ")
   pool.query(`SELECT * FROM (SELECT STATION, year, h4.snowmelt_doy, h4.avg_daily_prcp, NAME FROM hypothesis_4 h4
-RIGHT JOIN selected_stations ss on ss.STATION_ID = h4.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}';`,
+RIGHT JOIN selected_stations ss on ss.STATION_ID = h4.STATION) AS res WHERE STATION = '${input}' OR NAME = '${input}' ORDER BY h4.year;`,
+    
+  (err, data) => {
+    if (err) {
+      return res.json(err)
+    }
+    else {
+      return res.json(data)
+    }
+  });
+});
+
+app.get(getStationHypothesis5, (req, res) => {
+  pool.query(`SELECT 
+    r.REGION,
+    h1.support_pct as h1_support_pct,
+    h2.support_pct as h2_support_pct,
+    h3.support_pct as h3_support_pct,
+    h4.support_pct as h4_support_pct
+FROM (SELECT DISTINCT REGION FROM selected_stations) r
+LEFT JOIN (
+    SELECT ss.REGION, ROUND(SUM(CASE WHEN early_anomaly < 0 AND late_anomaly > 0 THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as support_pct
+    FROM hypothesis_1 h1 JOIN selected_stations ss ON h1.station = ss.STATION_ID GROUP BY ss.REGION
+) h1 ON r.REGION = h1.REGION
+LEFT JOIN (
+    SELECT ss.REGION, ROUND(SUM(CASE WHEN spring_temp_anomaly > 0 AND heat_wave_days > 3 THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as support_pct
+    FROM hypothesis_2 h2 JOIN selected_stations ss ON h2.station = ss.STATION_ID GROUP BY ss.REGION
+) h2 ON r.REGION = h2.REGION
+LEFT JOIN (
+    SELECT ss.REGION, ROUND(SUM(CASE WHEN is_high_wind = 1 AND range_change < 0 THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN is_high_wind = 1 THEN 1 ELSE 0 END), 0) * 100, 2) as support_pct
+    FROM hypothesis_3 h3 JOIN selected_stations ss ON h3.station = ss.STATION_ID GROUP BY ss.REGION
+) h3 ON r.REGION = h3.REGION
+LEFT JOIN (
+    SELECT ss.REGION, ROUND(SUM(CASE WHEN melt_anomaly_days < 0 AND prcp_anomaly_mm < 0 THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) as support_pct
+    FROM hypothesis_4 h4 JOIN selected_stations ss ON h4.station = ss.STATION_ID GROUP BY ss.REGION
+) h4 ON r.REGION = h4.REGION
+ORDER BY r.REGION;`,
     
   (err, data) => {
     if (err) {

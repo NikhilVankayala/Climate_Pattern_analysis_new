@@ -41,17 +41,17 @@ const Station = ({data, hypothesis, result}) => {
             }
         } else if(hypothesis == "h4") {
             if(result.correlation_coefficient_sample > 0.3) {
-                icon = greenIcon;
-            } else if (result.correlation_coefficient_sample < -0.3) {
                 icon = redIcon;
+            } else if (result.correlation_coefficient_sample < -0.3) {
+                icon = greenIcon;
             } else {
                 icon = yellowIcon;
             }
         } else {
             if(result.correlation_coefficient_sample > 0.3) {
-                icon = greenIcon;
-            } else if (result.correlation_coefficient_sample < -0.3) {
                 icon = redIcon;
+            } else if (result.correlation_coefficient_sample < -0.3) {
+                icon = greenIcon;
             } else {
                 icon = yellowIcon;
             }

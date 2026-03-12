@@ -34,6 +34,7 @@ ChartJS.register(
 
 export const options = {
   responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: {
       position: 'top',
@@ -45,41 +46,12 @@ export const options = {
   },
 };
 
-//const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-
 function App() {
-  /*function useDebounce(value, delay) {
-    const [debouncedValue, setDebouncedValue] = useState(value);
-
-    useEffect(() => {
-      // Set a timeout to update the debounced value after the specified delay
-      const timer = setTimeout(() => {
-        setDebouncedValue(value);
-      }, delay);
-
-      // Cleanup function to clear the timeout if the value changes before the delay
-      return () => {
-        clearTimeout(timer);
-      };
-    }, [value, delay]); // Only re-run if value or delay changes
-
-    return debouncedValue;
-  }*/
 
   const [hypothesis, setHypothesis] = useState("h1");
   const [results, setResults] = useState([]);
-  /*const [query, setQuery] = useState("");
-  // Debounce the query with a 500ms delay
-  const debouncedQuery = useDebounce(query, 500);
 
-  useEffect(() => {
-    if (debouncedQuery) {
-      //console.log("Performing search for:", debouncedQuery);
-      // **Place your API call or search function here**
-      const res = axios.get("http://localhost:9000/search", {params: {"input": debouncedQuery}});
-
-    }
-  }, [debouncedQuery]); // Only runs when the debounced query changes */
+  const [hyp5, setHyp5] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +68,9 @@ function App() {
         const res = await axios.get("http://localhost:9000/stationResults1");
         setResults(res.data);
       }
-        
+
+      const res = await axios.get("http://localhost:9000/stationResults5");
+      setHyp5(res.data);
     }
     fetchData();
   }, [hypothesis]);
@@ -140,10 +114,6 @@ function App() {
         setSelection(res.data);
       }
 
-
-      //const res = await axios.get("http://localhost:9000/searchValue1", {params: {"out": output}});
-      //res.data.map((d) => setOptions((prevOptions) => [...prevOptions, {value: d.result, label: d.result}]));
-      //setSelection(res.data);
     }
     fetchData();
   }, [output]);
@@ -210,11 +180,11 @@ function App() {
         data: set3C,
         backgroundColor: 'rgba(38, 185, 9, 0.5)',
       },
-      {
+      /*{
         label: 'Average Wind Speed (m/s)',
         data: set3A,
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
+      },*/
       {
         label: 'Temperature Range After Wind Event',
         data: set3B,
@@ -238,6 +208,31 @@ function App() {
         label: 'Average Daily Percipitation (mm)',
         data: set4B,
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+    ],
+  };
+
+  const labels5 = hyp5.map(dataPoint => dataPoint.REGION);
+  const set5A = hyp5.map(dataPoint => dataPoint.h1_support_pct);
+  const set5B = hyp5.map(dataPoint => dataPoint.h2_support_pct);
+  const set5C = hyp5.map(dataPoint => dataPoint.h4_support_pct);
+  const data5 = {
+    labels: labels5,
+    datasets: [
+      {
+        label: 'H1 Support',
+        data: set5A,
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      },
+      {
+        label: 'H2 Support',
+        data: set5B,
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+      },
+      {
+        label: 'H4 Support',
+        data: set5C,
+        backgroundColor: 'rgba(38, 185, 9, 0.5)',
       },
     ],
   };
@@ -281,14 +276,15 @@ function App() {
 
           <DisplayBox title="Regional Comparison">
             <p><strong>Hypothesis 5:</strong> Climate relationships are directionally consistent across regions.</p>
+             <div><Bar width={null} height={null} options={options} data={data5} /></div> 
           </DisplayBox>
         </div>
       </div>
 
       {popup && <Popup>
-        <div>
-            
-           <Bar options={options} data={BestData} />
+        <div class="popup-holder">
+          <div class="popup-header">Hypothesis: {hypothesis.toUpperCase()}</div>
+          { selection.length > 0 ? <div id="graph"><Bar width={null} height={null} options={options} data={BestData} /></div> : <div id="graph-sad">No data for this station.</div>} 
         </div>
         <button id="DIE" onClick={() => setPopup(false)}>×</button>
       </Popup>}

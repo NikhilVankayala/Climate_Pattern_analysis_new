@@ -16,11 +16,21 @@ const Map = ({hypothesis, results}) => {
 
     useEffect(() => {
         const fetchData = async () => {
-            const res = await axios.get("http://localhost:9000/stations");
+            let h;
+            if(hypothesis == "h2") {
+                h = "hypothesis_2";
+            } else if(hypothesis == "h3") {
+                h = "hypothesis_3";
+            } else if (hypothesis == "h4") {
+                h = "hypothesis_4";
+            } else {
+                h = "hypothesis_1";
+            }
+            const res = await axios.get("http://localhost:9000/stations", {params: {"input": h}});
             setSomeMarkers(res.data);
         }
         fetchData();
-    }, []);
+    }, [hypothesis]);
 
     return(
     <div id='map'>
